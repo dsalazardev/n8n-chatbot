@@ -1,0 +1,247 @@
+{
+  "name": "Módulo de Reportes Especializados IA",
+  "nodes": [
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "mensaje_estudiante",
+              "stringValue": "={{ $json.body.mensaje_estudiante }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        -592,
+        32
+      ],
+      "id": "cb914064-8016-4de1-a34d-87badab8c78c"
+    },
+    {
+      "parameters": {
+        "text": "=Actúa como un clasificador de soporte técnico B2B de alta precisión. Analiza el siguiente mensaje recibido y extrae de forma estructurada:\n\na. Nivel de prioridad (Crítica, Alta, Media, Baja).\nb. Componente afectado del sistema.\nc. Impacto estimado en la operación.\n\nMensaje a analizar: {{ $json.mensaje_estudiante }}",
+        "options": {}
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.1,
+      "position": [
+        -368,
+        32
+      ],
+      "id": "8c191187-e59f-4f19-83ef-7319e9bbbec8"
+    },
+    {
+      "parameters": {
+        "chatId": "5144176470",
+        "text": "=<b> ¡ALERTA CRÍTICA DE SOPORTE B2B! </b>\nEl Agente de IA ha procesado un nuevo ticket con la siguiente resolución: {{ $json['Analisis de la IA'] }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        32
+      ],
+      "id": "6f85ba90-f48b-4264-a8f0-87f4d7c1f20a",
+      "webhookId": "be64e878-8716-4e96-8478-fed530f879af",
+      "credentials": {
+        "telegramApi": {
+          "id": "3ooSoibdudLlzk0A",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1pbVlO5aiukQeeQJB0ixfboBTVy5Qdwed-FGN8mousCQ",
+          "mode": "list",
+          "cachedResultName": "Historial de Tickets IA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pbVlO5aiukQeeQJB0ixfboBTVy5Qdwed-FGN8mousCQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pbVlO5aiukQeeQJB0ixfboBTVy5Qdwed-FGN8mousCQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $now }}",
+            "Mensaje Original": "={{ $('Edit Fields').item.json.body.mensaje_estudiante }}",
+            "Analisis de la IA": "={{ $json.output.impact }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Mensaje Original",
+              "displayName": "Mensaje Original",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Analisis de la IA",
+              "displayName": "Analisis de la IA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "name": "Append row in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        32
+      ],
+      "id": "ed4ae8ce-d3e1-4c93-b127-ca41e3a3f78a",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DgYPExCso1tj7cCN",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        288
+      ],
+      "id": "2ef14dae-3861-4c4b-8cc0-86730fc879b6",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "T86QtwA8S2YZIaWh",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "httpMethod": [
+          "POST"
+        ],
+        "path": "255b21ca-67f7-47cf-9227-6e650f2796de",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -800,
+        32
+      ],
+      "id": "486b9523-8740-4bbd-b10f-7d3a8f846f85",
+      "name": "Webhook",
+      "webhookId": "255b21ca-67f7-47cf-9227-6e650f2796de"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c41dc0d0-64cc-43d9-9cff-210103147912",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "688be437b435980a30cdc3dee5bc9b4ec5adfc07280923ac956189436fb3f1ee"
+  },
+  "id": "rF1GTk12FIt4nJqI",
+  "tags": []
+}
