@@ -1,16 +1,3 @@
-# Portal de Soporte B2B con IA
-
-Formulario web que envía incidentes técnicos a un workflow de n8n. El agente de IA (Groq) clasifica el incidente, lo registra en Google Sheets y notifica al equipo por Telegram.
-
----
-
-## Requisitos previos
-
-- Cuenta en [n8n Cloud](https://n8n.io) con el workflow configurado
-- Cuenta en [Groq Cloud](https://console.groq.com) para el modelo de lenguaje
-- Git instalado en tu equipo
-
----
 
 ## Cómo hacer fork y trabajar con upstream
 
