@@ -1,5 +1,5 @@
 {
-  "name": "Módulo de Reportes Especializados IA",
+  "name": "RAG Supabase Vector May",
   "nodes": [
     {
       "parameters": {
@@ -24,22 +24,8 @@
     },
     {
       "parameters": {
-        "text": "=Actúa como un clasificador de soporte técnico B2B de alta precisión. Analiza el siguiente mensaje recibido y extrae de forma estructurada:\n\na. Nivel de prioridad (Crítica, Alta, Media, Baja).\nb. Componente afectado del sistema.\nc. Impacto estimado en la operación.\n\nMensaje a analizar: {{ $json.mensaje_estudiante }}",
-        "options": {}
-      },
-      "name": "AI Agent",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.1,
-      "position": [
-        -368,
-        32
-      ],
-      "id": "8c191187-e59f-4f19-83ef-7319e9bbbec8"
-    },
-    {
-      "parameters": {
         "chatId": "5144176470",
-        "text": "=<b> ¡ALERTA CRÍTICA DE SOPORTE B2B! </b>\nEl Agente de IA ha procesado un nuevo ticket con la siguiente resolución: {{ $json['Analisis de la IA'] }}",
+        "text": "=<b> ¡ALERTA CRÍTICA DE SOPORTE B2B! </b>\nEl Agente de IA ha procesado un nuevo ticket con la siguiente resolución: {{ $('AI Agent').item.json.output }}",
         "additionalFields": {
           "parse_mode": "HTML"
         }
@@ -82,7 +68,7 @@
           "value": {
             "Fecha": "={{ $now }}",
             "Mensaje Original": "={{ $('Edit Fields').item.json.body.mensaje_estudiante }}",
-            "Analisis de la IA": "={{ $json.output.impact }}"
+            "Analisis de la IA": "={{ $json.output }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -136,26 +122,6 @@
     },
     {
       "parameters": {
-        "model": "llama-3.1-8b-instant",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
-      "typeVersion": 1,
-      "position": [
-        -560,
-        288
-      ],
-      "id": "2ef14dae-3861-4c4b-8cc0-86730fc879b6",
-      "name": "Groq Chat Model",
-      "credentials": {
-        "groqApi": {
-          "id": "T86QtwA8S2YZIaWh",
-          "name": "Groq account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "multipleMethods": true,
         "httpMethod": [
           "POST"
@@ -172,6 +138,229 @@
       "id": "486b9523-8740-4bbd-b10f-7d3a8f846f85",
       "name": "Webhook",
       "webhookId": "255b21ca-67f7-47cf-9227-6e650f2796de"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "=Inicio con RAG, para almacenar documentos",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        288
+      ],
+      "id": "396d544f-2faa-4d96-b002-0a1918c3a35e",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "eyHawE9tDXoBPcm2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "embeddingBatchSize": 50,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        784
+      ],
+      "id": "954436fd-587e-4e28-83ee-430a62a27adc",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "eyHawE9tDXoBPcm2",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "18ojePjlE6MmZMSk1KjOrgvCEF2pooyam",
+          "mode": "list",
+          "cachedResultName": "rag-uniconnect.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/18ojePjlE6MmZMSk1KjOrgvCEF2pooyam/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        784
+      ],
+      "id": "eb7eba9b-8e73-4d59-9d7d-62730235ab31",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Xs2NfI1jFctyGViX",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        784
+      ],
+      "id": "ed0c94c5-e478-4f7d-b357-73e533bdb11a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        544
+      ],
+      "id": "a26ebc77-7332-4c1c-8a43-f503771f2d83",
+      "name": "Embeddings OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "tBTbLLK7rXV7KQ5d",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        976
+      ],
+      "id": "5cb77a43-eae3-4dfc-8231-4725aa9884f7",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "tBTbLLK7rXV7KQ5d",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "documentConversion",
+        "operation": "pdfToTxt",
+        "pdf2x_input_type": "file",
+        "pdf2x_output": "file"
+      },
+      "type": "n8n-nodes-pdf-api-hub.pdfSplitMerge",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        784
+      ],
+      "id": "53549bf0-231a-4701-abfb-5a7a0aad3c96",
+      "name": "Convert PDF to plain text",
+      "credentials": {
+        "pdfapihubApi": {
+          "id": "aXJnXk7qaQjbPGQv",
+          "name": "PDF Hub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        992
+      ],
+      "id": "7ca155b0-1f94-487d-843f-c7345cd3a9a1",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Actúa como un clasificador de soporte técnico B2B de alta precisión. \n\nREGLA ESTRICTA Y OBLIGATORIA: Antes de clasificar, DEBES utilizar la herramienta de búsqueda en la base de conocimientos (Supabase Vector Store) para consultar información documentada sobre el componente, el error o el procedimiento mencionado en el mensaje del cliente. \n\nUna vez hayas consultado la base de datos, analiza el mensaje recibido y extrae de forma estructurada en formato JSON:\n\na. Nivel de prioridad (Crítica, Alta, Media, Baja).\nb. Componente afectado del sistema.\nc. Impacto estimado en la operación.\n\nMensaje a analizar: {{ $json.mensaje_estudiante }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -384,
+        32
+      ],
+      "id": "fca321fc-188a-42a7-b7bd-fe5863f21ac3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        288
+      ],
+      "id": "f76fcb3c-499a-4563-98cd-425cc4388cc0",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "T86QtwA8S2YZIaWh",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.body.mensaje_estudiante }}",
+        "collectionName": "memory",
+        "databaseName": "memory"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryMongoDbChat",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        288
+      ],
+      "id": "d1ae44b1-1e64-400d-9f46-3ad6802743f5",
+      "name": "MongoDB Chat Memory",
+      "credentials": {
+        "mongoDb": {
+          "id": "HrxyndM41D1jA3IX",
+          "name": "MongoDB account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -182,6 +371,105 @@
           {
             "node": "AI Agent",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Convert PDF to plain text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert PDF to plain text": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_document",
             "index": 0
           }
         ]
@@ -209,23 +497,12 @@
         ]
       ]
     },
-    "Append row in sheet": {
-      "main": [
+    "MongoDB Chat Memory": {
+      "ai_memory": [
         [
           {
-            "node": "Send a text message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Webhook": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields",
-            "type": "main",
+            "node": "AI Agent",
+            "type": "ai_memory",
             "index": 0
           }
         ]
@@ -237,7 +514,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "c41dc0d0-64cc-43d9-9cff-210103147912",
+  "versionId": "8da16ed1-10cc-4133-9527-09f6aabdda3e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "688be437b435980a30cdc3dee5bc9b4ec5adfc07280923ac956189436fb3f1ee"
